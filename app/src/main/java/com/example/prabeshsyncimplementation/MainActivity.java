@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -70,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
         cursor.close();
         dbHelper.close();
+
+        Log.i("arraListData", String.valueOf(arrayList));
+
     }
 
     private void saveToLocalStorage(String name){

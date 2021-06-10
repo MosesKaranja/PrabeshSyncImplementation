@@ -1,5 +1,6 @@
 package com.example.prabeshsyncimplementation;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.Name.setText(arrayList.get(position).getName());
+        Log.i("BindViewHolderName",arrayList.get(position).getName());
+        //Log.i("BindViewHolderSyncS",arrayList.get(position).getSync_status());
+
         int sync_status = arrayList.get(position).getSync_status();
 
         if (sync_status == DbContract.SYNC_STATUS_OK){

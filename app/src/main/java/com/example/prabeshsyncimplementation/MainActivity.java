@@ -15,7 +15,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     Button buttonSubmit;
@@ -48,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String number = editTextPhoneNumber.getText().toString();
-                saveToLocalStorage(number);
+                //saveToLocalStorage(number);
+                saveToAppServer(number);
                 editTextPhoneNumber.setText("");
 
             }
@@ -76,21 +88,74 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void saveToLocalStorage(String name){
-        DbHelper dbHelper = new DbHelper(this);
-        SQLiteDatabase database = dbHelper.getWritableDatabase();
+    private void saveToAppServer(String name){
+//        DbHelper dbHelper = new DbHelper(this);
+//        SQLiteDatabase database = dbHelper.getWritableDatabase();
 
 
         if (checkNetworkConnection()){
+            Log.i("insideIf","In side of If");
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, DbContract.SERVER_URL, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        Log.i("InTry","Executing Inside try stmt");
+                        Log.i("InTryresponse",response);
+
+                        JSONObject jsonObject = new JSONObject(response);
+                        String Response = jsonObject.getString("respoonse");
+                        Log.i("jsonObjectResponse", String.valueOf(jsonObject));
+                        if (Response.equals("OK")){
+                            saveToLocalStorage(name, DbContract.SYNC_STATUS_OK);
+
+                        }
+                        else{
+                            saveToLocalStorage(name, DbContract.SYNC_STATUS_FAILED);
+
+                        }
+
+                    }
+                    catch (JSONException e){
+                        e.printStackTrace();
+
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.i("onError", "Execured On Error Response");
+                    saveToLocalStorage(name, DbContract.SYNC_STATUS_FAILED);
+
+                    Log.i("onErrorCause", String.valueOf(error.getCause()));
+
+                    Log.i("onErrorMessage", error.getMessage());
+
+                }
+            })
+            {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError{
+                    Map<String, String> params = new HashMap<>();
+                    params.put("name", name);
+                    return params;
+                }
+            }
+            ;
+
+            MySingleton.getInstance(MainActivity.this).addToRequestQue(stringRequest);
 
         }
         else{
-            dbHelper.saveToLocalDatabase(name, DbContract.SYNC_STATUS_FAILED, database);
+            Log.i("InElse","Executed Inside Else STMT");
+            //dbHelper.saveToLocalDatabase(name, DbContract.SYNC_STATUS_FAILED, database);
+            saveToLocalStorage(name,DbContract.SYNC_STATUS_FAILED);
 
         }
 
-        readFromLocalStorage();
-        dbHelper.close();
+//        readFromLocalStorage();
+//        dbHelper.close();
 
 
     }
@@ -101,6 +166,16 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return (networkInfo !=null && networkInfo.isConnected());
+
+    }
+
+    private void saveToLocalStorage(String name, int sync){
+        DbHelper dbHelper = new DbHelper(this);
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+        dbHelper.saveToLocalDatabase(name, sync, database);
+        readFromLocalStorage();
+        dbHelper.close();
+
 
     }
 

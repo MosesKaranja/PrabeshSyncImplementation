@@ -6,6 +6,8 @@ public class DbContract {
 
     public static final String DATABASE_NAME = "contacsdb";
     public static final String TABLE_NAME = "contactinfo";
+    public static final String UI_UPDATE_BROADCAST = "com.example.prabeshsyncimplementation.uiupdatebroadcast";
+
     public static final String NAME = "name";
     public static final String SYNC_STATUS = "syncstatus";
 

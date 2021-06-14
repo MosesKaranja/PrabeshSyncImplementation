@@ -22,8 +22,10 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".NetworkMonitor">
-            <action android:name="android.net.conn.CONNECTIVITY_CHANGE"></action>
+        <receiver android:name="com.example.prabeshsyncimplementation.NetworkMonitor" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
         </receiver>
     </application>
 

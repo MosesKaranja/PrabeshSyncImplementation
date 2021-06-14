@@ -4,11 +4,11 @@ include_once 'db_functions.php';
 //Create object of db functions
 $db = new DB_FUNCTIONS();
 
-if(!empty($_POST["contact_number"])){
+if(!empty($_POST["name"])){
 
-    $contact = $_POST["contact_number"];
+    $contact_number = $_POST["name"];
 
-    $saveData = $db->storeUser($contact);
+    $saveData = $db->storeUser($contact_number);
 
 
     if($saveData){
@@ -20,7 +20,7 @@ if(!empty($_POST["contact_number"])){
 
     }
 
-    echo json_encode(array("response" => $status));
+    echo json_encode(array("response" => $status, "value" => $contact_number));
 
     $db->close();
 

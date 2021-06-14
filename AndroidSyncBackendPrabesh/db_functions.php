@@ -17,7 +17,7 @@ class DB_FUNCTIONS{
 
     public function storeUser($contact_number){
 
-        $result = mysqli_query($this->db,"INSERT INTO contacts(`contact_number`) VALUES ('$contact_number')");
+        $result = mysqli_query($this->db,"INSERT INTO  users_new(`user_name`) VALUES ('$contact_number')");
 
         if($result){
             //return "Yeah We created a user". $result;
@@ -26,6 +26,9 @@ class DB_FUNCTIONS{
         }
         else{
             //return "NOOOO, Failed Crreating User". mysqli_error($this->db);
+            //return mysqli_error($this->db);
+            //The value above can be very useful when debugging.
+            //Just have to find how to output it with false to show this is the error and the reason is dis.
             return false;
 
         }

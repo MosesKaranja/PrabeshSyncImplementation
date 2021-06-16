@@ -21,6 +21,10 @@ import com.android.volley.toolbox.StringRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,23 +38,38 @@ public class UploadWorker extends Worker {
     @Override
     public Result doWork() {
 
-        if (checkNetworkConnection(getApplicationContext())){
+        Log.i("LoggedHereiz","Doing some work");
+        //return Result.success();
+
+        if (checkNetworkConnection()){
             DbHelper dbHelper = new DbHelper(getApplicationContext());
             SQLiteDatabase database = dbHelper.getWritableDatabase();
             Cursor cursor = dbHelper.readFromLocalDatabase(database);
 
+            //Log.i("cursorColumnNames", String.valueOf(cursor.getColumnNames()));
+
+            //Log.i("cursorNames", cursor.getString(cursor.getColumnIndex(DbContract.NAME)));
+
             while(cursor.moveToNext()){
                 int sync_status = cursor.getInt(cursor.getColumnIndex(DbContract.SYNC_STATUS));
+                //int id = cursor.getInt(cursor.getColumnIndex("id"));
+                String Namecursor = cursor.getString(cursor.getColumnIndex(DbContract.NAME));
+
+                //Log.i("cursorId", String.valueOf(id));
+                //Log.i("cursorName",Namecursor);
+                //Log.i("cursorSyncStatus", String.valueOf(sync_status));
                 if (sync_status == DbContract.SYNC_STATUS_FAILED){
                     String Name = cursor.getString(cursor.getColumnIndex(DbContract.NAME));
+                    Log.i("cursorNameiNiF", Name);
                     StringRequest stringRequest = new StringRequest(Request.Method.POST, DbContract.SERVER_URL, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             try{
                                 Log.i("RunningHere","Running in this try statement");
                                 JSONObject jsonObject = new JSONObject(response);
+                                Log.i("jsonObjectResponse", String.valueOf(jsonObject));
                                 String Response = jsonObject.getString("response");
-                                if (Response.equals("ok")){
+                                if (Response.equals("OK")){
                                     dbHelper.updateLocalDatabase(Name, DbContract.SYNC_STATUS_OK, database);
                                     getApplicationContext().sendBroadcast(new Intent(DbContract.UI_UPDATE_BROADCAST));
 
@@ -83,7 +102,7 @@ public class UploadWorker extends Worker {
                 }
 
             }
-            dbHelper.close();
+            //dbHelper.close();
             return Result.success();
 
         }
@@ -105,12 +124,29 @@ public class UploadWorker extends Worker {
 //        return Result.success();
 //    }
 
+//
+//    public boolean checkNetworkConnection(Context context){
+//        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+//        return (networkInfo !=null && networkInfo.isConnected());
+//
+//    }
 
-    public boolean checkNetworkConnection(Context context){
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return (networkInfo !=null && networkInfo.isConnected());
+    public boolean checkNetworkConnection(){
+        try{
+            int timeoutMs = 1500;
+            Socket sock = new Socket();
+            SocketAddress socketAddress = new InetSocketAddress("8.8.8.8", 53);
+            sock.connect(socketAddress, timeoutMs);
+            sock.close();
+            return true;
 
+        }
+
+        catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 

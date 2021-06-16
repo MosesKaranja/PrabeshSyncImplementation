@@ -80,14 +80,19 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        PeriodicWorkRequest saveRequest = new PeriodicWorkRequest.Builder(UploadWorker.class,1, TimeUnit.HOURS).build();
+        //PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(UploadWorker.class,1, TimeUnit.SECONDS).build();
+        //WorkManager.getInstance(getApplicationContext()).enqueue(periodicWorkRequest);
 
 
 
-        Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).setRequiredNetworkType(NetworkType.UNMETERED).build();
-        WorkRequest myWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class).setConstraints(constraints).build();
+        Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
+        //WorkRequest myWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class).setConstraints(constraints).build();
+        //PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(UploadWorker.class).setConstraints(constraints).build();
+        //WorkRequest workRequest = new PeriodicWorkRequest.Builder(UploadWorker.class).setConstraints(constraints).build();
+        WorkRequest mySyncWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class).setConstraints(constraints).addTag("SyncData").build();
+        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(UploadWorker.class, 1, TimeUnit.SECONDS).setConstraints(constraints).build();
 
-        WorkManager.getInstance(getApplicationContext()).enqueue(saveRequest);
+        WorkManager.getInstance(getApplicationContext()).enqueue(periodicWorkRequest);
 
 
 

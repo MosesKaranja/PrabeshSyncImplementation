@@ -20,17 +20,8 @@ class MyCustomApplicationClass : Application() {
         // registerNetworkCallback or registerDefaultNetworkCallback functions
         // instead for faster and more detailed updates about the network changes they care about.
 
-        var connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager;
-
-        var builder = NetworkRequest.Builder()
-
-        connectivityManager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback (){
-
-        })
 
 
 
     }
-
-    fun registerNetworkCallback(request: NetworkRequest?, networkCallback: NetworkCallback?) {}
 }

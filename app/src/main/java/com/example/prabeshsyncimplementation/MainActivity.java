@@ -3,6 +3,12 @@ package com.example.prabeshsyncimplementation;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -33,6 +39,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -66,6 +73,29 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new RecyclerAdapter(arrayList);
         recyclerView.setAdapter(adapter);
+
+        //WorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class).build();
+        //WorkManager.getInstance(getApplicationContext()).enqueue(uploadWorkRequest);
+
+
+
+
+        PeriodicWorkRequest saveRequest = new PeriodicWorkRequest.Builder(UploadWorker.class,1, TimeUnit.HOURS).build();
+
+
+
+        Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).setRequiredNetworkType(NetworkType.UNMETERED).build();
+        WorkRequest myWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class).setConstraints(constraints).build();
+
+        WorkManager.getInstance(getApplicationContext()).enqueue(saveRequest);
+
+
+
+
+
+
+
+
 
         readFromLocalStorage();
 
@@ -248,4 +278,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ignored) {
         }
     }
+
+
 }

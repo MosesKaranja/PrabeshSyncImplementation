@@ -1,6 +1,5 @@
 package com.example.prabeshsyncimplementation;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -8,6 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -21,16 +24,18 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NetworkMonitor extends BroadcastReceiver {
+public class UploadWorker extends Worker {
 
+    public UploadWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
+
+    @NonNull
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public Result doWork() {
 
-        Log.i("RunningHere","Running in this try statement");
-
-
-        if (checkNetworkConnection(context)){
-            DbHelper dbHelper = new DbHelper(context);
+        if (checkNetworkConnection(getApplicationContext())){
+            DbHelper dbHelper = new DbHelper(getApplicationContext());
             SQLiteDatabase database = dbHelper.getWritableDatabase();
             Cursor cursor = dbHelper.readFromLocalDatabase(database);
 
@@ -47,7 +52,7 @@ public class NetworkMonitor extends BroadcastReceiver {
                                 String Response = jsonObject.getString("response");
                                 if (Response.equals("ok")){
                                     dbHelper.updateLocalDatabase(Name, DbContract.SYNC_STATUS_OK, database);
-                                    context.sendBroadcast(new Intent(DbContract.UI_UPDATE_BROADCAST));
+                                    getApplicationContext().sendBroadcast(new Intent(DbContract.UI_UPDATE_BROADCAST));
 
                                 }
 
@@ -66,23 +71,40 @@ public class NetworkMonitor extends BroadcastReceiver {
                     })
                     {
                         @Override
-                        protected Map<String, String> getParams() throws AuthFailureError{
+                        protected Map<String, String> getParams() throws AuthFailureError {
                             Map<String, String> params = new HashMap<>();
                             params.put("name", Name);
                             return params;
                         }
                     };
 
-                    MySingleton.getInstance(context).addToRequestQue(stringRequest);
+                    MySingleton.getInstance(getApplicationContext()).addToRequestQue(stringRequest);
 
                 }
 
             }
             dbHelper.close();
+            return Result.success();
 
         }
 
+
+        return Result.failure();
     }
+
+
+
+
+//    @Override
+//    public Result doWork() {
+//
+//        // Do the work here--in this case, upload the images.
+//        uploadImages();
+//
+//        // Indicate whether the work finished successfully with the Result
+//        return Result.success();
+//    }
+
 
     public boolean checkNetworkConnection(Context context){
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -90,4 +112,6 @@ public class NetworkMonitor extends BroadcastReceiver {
         return (networkInfo !=null && networkInfo.isConnected());
 
     }
+
+
 }
